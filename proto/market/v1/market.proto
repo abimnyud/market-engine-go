@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package market.v1;
+
+option go_package = "market-engine-go/gen/go/market/v1";
+
+message StreamTradesRequest {
+  int32 interval_ms = 1;
+}
+
+message StreamTradesResponse {
+  string id = 1;
+  string ticker = 2;
+  double price = 3;
+  int32 size = 4;
+  string side = 5;
+  string timestamp = 6;
+}
+
+service MarketService {
+  rpc StreamTrades(StreamTradesRequest) returns (stream StreamTradesResponse);
+}
