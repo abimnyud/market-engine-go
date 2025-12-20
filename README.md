@@ -43,6 +43,21 @@ Start the server using `air` to enable hot reloading. The server will restart au
 air
 ```
 
+## **Running with Docker**
+
+You can also build and run the application using Docker.
+
+### 1. Build the Docker Image
+
+```bash
+docker build -t market-engine .
+```
+
+### 2. Run the Container
+
+```bash
+docker run -p 50051:50051 market-engine
+```
 
 ## **Project Structure**
 -   `cmd/market-engine`: Application entry point.

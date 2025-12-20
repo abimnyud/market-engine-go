@@ -15,6 +15,6 @@ WORKDIR /app
 
 COPY --from=build /market-engine /app/market-engine
 
-EXPOSE 8080
+EXPOSE 50051
 
 ENTRYPOINT ["/app/market-engine"]
