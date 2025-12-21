@@ -104,7 +104,7 @@ func (engine *MarketEngine) updateTrades() {
 
 func (engine *MarketEngine) RunPriceGenerator(ctx context.Context, symbol string, channel chan<- *marketv1.StreamTickersResponse) {
 	for {
-		interval := time.Duration(100+rand.IntN(1000)) * time.Millisecond
+		interval := time.Duration(100+rand.IntN(2000-100)) * time.Millisecond
 
 		select {
 		case <-ctx.Done():
