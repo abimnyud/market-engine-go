@@ -19,7 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	MarketService_StreamTrades_FullMethodName = "/market.v1.MarketService/StreamTrades"
+	MarketService_StreamTrades_FullMethodName  = "/market.v1.MarketService/StreamTrades"
+	MarketService_GetTickers_FullMethodName    = "/market.v1.MarketService/GetTickers"
+	MarketService_StreamTickers_FullMethodName = "/market.v1.MarketService/StreamTickers"
 )
 
 // MarketServiceClient is the client API for MarketService service.
@@ -27,6 +29,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MarketServiceClient interface {
 	StreamTrades(ctx context.Context, in *StreamTradesRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[StreamTradesResponse], error)
+	GetTickers(ctx context.Context, in *GetTickersRequest, opts ...grpc.CallOption) (*GetTickersResponse, error)
+	StreamTickers(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[StreamTickersRequest, StreamTickersResponse], error)
 }
 
 type marketServiceClient struct {
@@ -56,11 +60,36 @@ func (c *marketServiceClient) StreamTrades(ctx context.Context, in *StreamTrades
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type MarketService_StreamTradesClient = grpc.ServerStreamingClient[StreamTradesResponse]
 
+func (c *marketServiceClient) GetTickers(ctx context.Context, in *GetTickersRequest, opts ...grpc.CallOption) (*GetTickersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetTickersResponse)
+	err := c.cc.Invoke(ctx, MarketService_GetTickers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *marketServiceClient) StreamTickers(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[StreamTickersRequest, StreamTickersResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &MarketService_ServiceDesc.Streams[1], MarketService_StreamTickers_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[StreamTickersRequest, StreamTickersResponse]{ClientStream: stream}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type MarketService_StreamTickersClient = grpc.BidiStreamingClient[StreamTickersRequest, StreamTickersResponse]
+
 // MarketServiceServer is the server API for MarketService service.
 // All implementations must embed UnimplementedMarketServiceServer
 // for forward compatibility.
 type MarketServiceServer interface {
 	StreamTrades(*StreamTradesRequest, grpc.ServerStreamingServer[StreamTradesResponse]) error
+	GetTickers(context.Context, *GetTickersRequest) (*GetTickersResponse, error)
+	StreamTickers(grpc.BidiStreamingServer[StreamTickersRequest, StreamTickersResponse]) error
 	mustEmbedUnimplementedMarketServiceServer()
 }
 
@@ -73,6 +102,12 @@ type UnimplementedMarketServiceServer struct{}
 
 func (UnimplementedMarketServiceServer) StreamTrades(*StreamTradesRequest, grpc.ServerStreamingServer[StreamTradesResponse]) error {
 	return status.Error(codes.Unimplemented, "method StreamTrades not implemented")
+}
+func (UnimplementedMarketServiceServer) GetTickers(context.Context, *GetTickersRequest) (*GetTickersResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetTickers not implemented")
+}
+func (UnimplementedMarketServiceServer) StreamTickers(grpc.BidiStreamingServer[StreamTickersRequest, StreamTickersResponse]) error {
+	return status.Error(codes.Unimplemented, "method StreamTickers not implemented")
 }
 func (UnimplementedMarketServiceServer) mustEmbedUnimplementedMarketServiceServer() {}
 func (UnimplementedMarketServiceServer) testEmbeddedByValue()                       {}
@@ -106,18 +141,54 @@ func _MarketService_StreamTrades_Handler(srv interface{}, stream grpc.ServerStre
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type MarketService_StreamTradesServer = grpc.ServerStreamingServer[StreamTradesResponse]
 
+func _MarketService_GetTickers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTickersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MarketServiceServer).GetTickers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MarketService_GetTickers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MarketServiceServer).GetTickers(ctx, req.(*GetTickersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MarketService_StreamTickers_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(MarketServiceServer).StreamTickers(&grpc.GenericServerStream[StreamTickersRequest, StreamTickersResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type MarketService_StreamTickersServer = grpc.BidiStreamingServer[StreamTickersRequest, StreamTickersResponse]
+
 // MarketService_ServiceDesc is the grpc.ServiceDesc for MarketService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var MarketService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "market.v1.MarketService",
 	HandlerType: (*MarketServiceServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetTickers",
+			Handler:    _MarketService_GetTickers_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "StreamTrades",
 			Handler:       _MarketService_StreamTrades_Handler,
 			ServerStreams: true,
+		},
+		{
+			StreamName:    "StreamTickers",
+			Handler:       _MarketService_StreamTickers_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
 		},
 	},
 	Metadata: "market/v1/market.proto",

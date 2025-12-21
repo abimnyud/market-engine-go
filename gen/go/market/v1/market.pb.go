@@ -9,6 +9,7 @@ package v1
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -149,11 +150,263 @@ func (x *StreamTradesResponse) GetTimestamp() string {
 	return ""
 }
 
+type GetTickersRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetTickersRequest) Reset() {
+	*x = GetTickersRequest{}
+	mi := &file_market_v1_market_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTickersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTickersRequest) ProtoMessage() {}
+
+func (x *GetTickersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_market_v1_market_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetTickersRequest.ProtoReflect.Descriptor instead.
+func (*GetTickersRequest) Descriptor() ([]byte, []int) {
+	return file_market_v1_market_proto_rawDescGZIP(), []int{2}
+}
+
+type GetTickersResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Tickers       []*TickerData          `protobuf:"bytes,1,rep,name=tickers,proto3" json:"tickers,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetTickersResponse) Reset() {
+	*x = GetTickersResponse{}
+	mi := &file_market_v1_market_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTickersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTickersResponse) ProtoMessage() {}
+
+func (x *GetTickersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_market_v1_market_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetTickersResponse.ProtoReflect.Descriptor instead.
+func (*GetTickersResponse) Descriptor() ([]byte, []int) {
+	return file_market_v1_market_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *GetTickersResponse) GetTickers() []*TickerData {
+	if x != nil {
+		return x.Tickers
+	}
+	return nil
+}
+
+type TickerData struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Symbol        string                 `protobuf:"bytes,1,opt,name=symbol,proto3" json:"symbol,omitempty"`
+	Price         float64                `protobuf:"fixed64,2,opt,name=price,proto3" json:"price,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TickerData) Reset() {
+	*x = TickerData{}
+	mi := &file_market_v1_market_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TickerData) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TickerData) ProtoMessage() {}
+
+func (x *TickerData) ProtoReflect() protoreflect.Message {
+	mi := &file_market_v1_market_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TickerData.ProtoReflect.Descriptor instead.
+func (*TickerData) Descriptor() ([]byte, []int) {
+	return file_market_v1_market_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *TickerData) GetSymbol() string {
+	if x != nil {
+		return x.Symbol
+	}
+	return ""
+}
+
+func (x *TickerData) GetPrice() float64 {
+	if x != nil {
+		return x.Price
+	}
+	return 0
+}
+
+func (x *TickerData) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+type StreamTickersRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Symbols       []string               `protobuf:"bytes,1,rep,name=symbols,proto3" json:"symbols,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StreamTickersRequest) Reset() {
+	*x = StreamTickersRequest{}
+	mi := &file_market_v1_market_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StreamTickersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StreamTickersRequest) ProtoMessage() {}
+
+func (x *StreamTickersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_market_v1_market_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StreamTickersRequest.ProtoReflect.Descriptor instead.
+func (*StreamTickersRequest) Descriptor() ([]byte, []int) {
+	return file_market_v1_market_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *StreamTickersRequest) GetSymbols() []string {
+	if x != nil {
+		return x.Symbols
+	}
+	return nil
+}
+
+type StreamTickersResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Symbol        string                 `protobuf:"bytes,1,opt,name=symbol,proto3" json:"symbol,omitempty"`
+	Price         float64                `protobuf:"fixed64,2,opt,name=price,proto3" json:"price,omitempty"`
+	Change        *wrapperspb.Int32Value `protobuf:"bytes,3,opt,name=change,proto3" json:"change,omitempty"`
+	Timestamp     int64                  `protobuf:"varint,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StreamTickersResponse) Reset() {
+	*x = StreamTickersResponse{}
+	mi := &file_market_v1_market_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StreamTickersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StreamTickersResponse) ProtoMessage() {}
+
+func (x *StreamTickersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_market_v1_market_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StreamTickersResponse.ProtoReflect.Descriptor instead.
+func (*StreamTickersResponse) Descriptor() ([]byte, []int) {
+	return file_market_v1_market_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *StreamTickersResponse) GetSymbol() string {
+	if x != nil {
+		return x.Symbol
+	}
+	return ""
+}
+
+func (x *StreamTickersResponse) GetPrice() float64 {
+	if x != nil {
+		return x.Price
+	}
+	return 0
+}
+
+func (x *StreamTickersResponse) GetChange() *wrapperspb.Int32Value {
+	if x != nil {
+		return x.Change
+	}
+	return nil
+}
+
+func (x *StreamTickersResponse) GetTimestamp() int64 {
+	if x != nil {
+		return x.Timestamp
+	}
+	return 0
+}
+
 var File_market_v1_market_proto protoreflect.FileDescriptor
 
 const file_market_v1_market_proto_rawDesc = "" +
 	"\n" +
-	"\x16market/v1/market.proto\x12\tmarket.v1\"6\n" +
+	"\x16market/v1/market.proto\x12\tmarket.v1\x1a\x1egoogle/protobuf/wrappers.proto\"6\n" +
 	"\x13StreamTradesRequest\x12\x1f\n" +
 	"\vinterval_ms\x18\x01 \x01(\x05R\n" +
 	"intervalMs\"\x9a\x01\n" +
@@ -163,9 +416,27 @@ const file_market_v1_market_proto_rawDesc = "" +
 	"\x05price\x18\x03 \x01(\x01R\x05price\x12\x12\n" +
 	"\x04size\x18\x04 \x01(\x05R\x04size\x12\x12\n" +
 	"\x04side\x18\x05 \x01(\tR\x04side\x12\x1c\n" +
-	"\ttimestamp\x18\x06 \x01(\tR\ttimestamp2b\n" +
+	"\ttimestamp\x18\x06 \x01(\tR\ttimestamp\"\x13\n" +
+	"\x11GetTickersRequest\"E\n" +
+	"\x12GetTickersResponse\x12/\n" +
+	"\atickers\x18\x01 \x03(\v2\x15.market.v1.TickerDataR\atickers\"N\n" +
+	"\n" +
+	"TickerData\x12\x16\n" +
+	"\x06symbol\x18\x01 \x01(\tR\x06symbol\x12\x14\n" +
+	"\x05price\x18\x02 \x01(\x01R\x05price\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\"0\n" +
+	"\x14StreamTickersRequest\x12\x18\n" +
+	"\asymbols\x18\x01 \x03(\tR\asymbols\"\x98\x01\n" +
+	"\x15StreamTickersResponse\x12\x16\n" +
+	"\x06symbol\x18\x01 \x01(\tR\x06symbol\x12\x14\n" +
+	"\x05price\x18\x02 \x01(\x01R\x05price\x123\n" +
+	"\x06change\x18\x03 \x01(\v2\x1b.google.protobuf.Int32ValueR\x06change\x12\x1c\n" +
+	"\ttimestamp\x18\x04 \x01(\x03R\ttimestamp2\x87\x02\n" +
 	"\rMarketService\x12Q\n" +
-	"\fStreamTrades\x12\x1e.market.v1.StreamTradesRequest\x1a\x1f.market.v1.StreamTradesResponse0\x01B#Z!market-engine-go/gen/go/market/v1b\x06proto3"
+	"\fStreamTrades\x12\x1e.market.v1.StreamTradesRequest\x1a\x1f.market.v1.StreamTradesResponse0\x01\x12K\n" +
+	"\n" +
+	"GetTickers\x12\x1c.market.v1.GetTickersRequest\x1a\x1d.market.v1.GetTickersResponse\"\x00\x12V\n" +
+	"\rStreamTickers\x12\x1f.market.v1.StreamTickersRequest\x1a .market.v1.StreamTickersResponse(\x010\x01B#Z!market-engine-go/gen/go/market/v1b\x06proto3"
 
 var (
 	file_market_v1_market_proto_rawDescOnce sync.Once
@@ -179,19 +450,31 @@ func file_market_v1_market_proto_rawDescGZIP() []byte {
 	return file_market_v1_market_proto_rawDescData
 }
 
-var file_market_v1_market_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_market_v1_market_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_market_v1_market_proto_goTypes = []any{
-	(*StreamTradesRequest)(nil),  // 0: market.v1.StreamTradesRequest
-	(*StreamTradesResponse)(nil), // 1: market.v1.StreamTradesResponse
+	(*StreamTradesRequest)(nil),   // 0: market.v1.StreamTradesRequest
+	(*StreamTradesResponse)(nil),  // 1: market.v1.StreamTradesResponse
+	(*GetTickersRequest)(nil),     // 2: market.v1.GetTickersRequest
+	(*GetTickersResponse)(nil),    // 3: market.v1.GetTickersResponse
+	(*TickerData)(nil),            // 4: market.v1.TickerData
+	(*StreamTickersRequest)(nil),  // 5: market.v1.StreamTickersRequest
+	(*StreamTickersResponse)(nil), // 6: market.v1.StreamTickersResponse
+	(*wrapperspb.Int32Value)(nil), // 7: google.protobuf.Int32Value
 }
 var file_market_v1_market_proto_depIdxs = []int32{
-	0, // 0: market.v1.MarketService.StreamTrades:input_type -> market.v1.StreamTradesRequest
-	1, // 1: market.v1.MarketService.StreamTrades:output_type -> market.v1.StreamTradesResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	4, // 0: market.v1.GetTickersResponse.tickers:type_name -> market.v1.TickerData
+	7, // 1: market.v1.StreamTickersResponse.change:type_name -> google.protobuf.Int32Value
+	0, // 2: market.v1.MarketService.StreamTrades:input_type -> market.v1.StreamTradesRequest
+	2, // 3: market.v1.MarketService.GetTickers:input_type -> market.v1.GetTickersRequest
+	5, // 4: market.v1.MarketService.StreamTickers:input_type -> market.v1.StreamTickersRequest
+	1, // 5: market.v1.MarketService.StreamTrades:output_type -> market.v1.StreamTradesResponse
+	3, // 6: market.v1.MarketService.GetTickers:output_type -> market.v1.GetTickersResponse
+	6, // 7: market.v1.MarketService.StreamTickers:output_type -> market.v1.StreamTickersResponse
+	5, // [5:8] is the sub-list for method output_type
+	2, // [2:5] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_market_v1_market_proto_init() }
@@ -205,7 +488,7 @@ func file_market_v1_market_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_market_v1_market_proto_rawDesc), len(file_market_v1_market_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

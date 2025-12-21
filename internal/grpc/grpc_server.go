@@ -1,15 +1,93 @@
 package grpcserver
 
 import (
+	"context"
 	"log"
 	marketv1 "market-engine-go/gen/go/market/v1"
 	marketengine "market-engine-go/internal/market-engine"
+	"math/rand/v2"
 	"time"
+
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type MarketServer struct {
 	marketv1.UnimplementedMarketServiceServer
 	Engine *marketengine.MarketEngine
+}
+
+func (server *MarketServer) GetTickers(ctx context.Context, req *marketv1.GetTickersRequest) (*marketv1.GetTickersResponse, error) {
+	var res []*marketv1.TickerData
+	for _, v := range server.Engine.Tickers {
+		res = append(res, v)
+	}
+
+	return &marketv1.GetTickersResponse{Tickers: res}, nil
+}
+
+func (server *MarketServer) StreamTickers(stream marketv1.MarketService_StreamTickersServer) error {
+	updateChannel := make(chan *marketv1.StreamTickersResponse, 100)
+	activeGenerators := make(map[string]context.CancelFunc)
+
+	ctx, cancel := context.WithCancel(stream.Context())
+	defer cancel()
+
+	log.Printf("[StreamTickers] Client connected")
+
+	go func() {
+		for {
+			req, err := stream.Recv()
+			if err != nil {
+				log.Println("[StreamTickers] Client closed connection")
+				return
+			}
+
+			log.Printf("[StreamTickers] Processing %v", req.Symbols)
+			newSymbols := make(map[string]bool)
+			for _, s := range req.Symbols {
+				newSymbols[s] = true
+			}
+
+			var unsubscribedSymbols []string
+			for symbol, stop := range activeGenerators {
+				if !newSymbols[symbol] {
+					unsubscribedSymbols = append(unsubscribedSymbols, symbol)
+					stop()
+					delete(activeGenerators, symbol)
+				}
+			}
+			if len(unsubscribedSymbols) > 0 {
+				log.Printf("[StreamTickers] Unsubscribing: %v", unsubscribedSymbols)
+			}
+
+			for _, symbol := range req.Symbols {
+				if _, exists := activeGenerators[symbol]; !exists {
+					if _, ok := server.Engine.Tickers[symbol]; !ok {
+						log.Printf("[StreamTickers] Ticker unavailable: %v", symbol)
+						continue
+					}
+
+					tickerCtx, tickerCancel := context.WithCancel(ctx)
+					activeGenerators[symbol] = tickerCancel
+					go server.runPriceGenerator(tickerCtx, symbol, updateChannel)
+				}
+			}
+		}
+	}()
+
+	for {
+		select {
+		case <-ctx.Done():
+			log.Println("[StreamTickers] Client disconnected")
+
+			return nil
+		case update := <-updateChannel:
+			if err := stream.Send(update); err != nil {
+				log.Printf("[StreamTickers] Send failed: %v", err)
+				return err
+			}
+		}
+	}
 }
 
 func (server *MarketServer) StreamTrades(req *marketv1.StreamTradesRequest, stream marketv1.MarketService_StreamTradesServer) error {
@@ -21,12 +99,12 @@ func (server *MarketServer) StreamTrades(req *marketv1.StreamTradesRequest, stre
 	ticker := time.NewTicker(time.Duration(intervalMs) * time.Millisecond)
 	defer ticker.Stop()
 
-	log.Printf("Client connected: streaming every %v", req.GetIntervalMs())
+	log.Printf("[StreamTrades] Client connected: streaming every %v", req.GetIntervalMs())
 
 	for {
 		select {
 		case <-stream.Context().Done():
-			log.Println("Client disconnected")
+			log.Println("[StreamTrades] Client disconnected")
 			return stream.Context().Err()
 		case <-ticker.C:
 			server.Engine.Mu.RLock()
@@ -49,12 +127,44 @@ func (server *MarketServer) StreamTrades(req *marketv1.StreamTradesRequest, stre
 			})
 
 			if err != nil {
-				log.Printf("Send failed: %v", err)
-				return err // Connection closed
+				log.Printf("[StreamTrades] Send failed: %v", err)
+				return err
 			}
-		case <-stream.Context().Done():
-			log.Println("Client disconnected")
-			return stream.Context().Err()
 		}
 	}
+}
+
+func (server *MarketServer) runPriceGenerator(ctx context.Context, symbol string, channel chan<- *marketv1.StreamTickersResponse) {
+	for {
+		interval := time.Duration(100+rand.IntN(2000)) * time.Millisecond
+
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(interval):
+			updated := server.calculateNextPrice(symbol)
+			channel <- updated
+		}
+	}
+}
+
+func (server *MarketServer) calculateNextPrice(symbol string) *marketv1.StreamTickersResponse {
+	lastPrice, exists := server.Engine.CurrentPrices[symbol]
+	if !exists {
+		lastPrice = int64(server.Engine.Tickers[symbol].Price)
+	}
+
+	changeAmount := int32((rand.IntN(10) - 5) * 1)
+	newPrice := float64(lastPrice + int64(changeAmount))
+
+	server.Engine.Tickers[symbol].Price = newPrice
+
+	updated := &marketv1.StreamTickersResponse{
+		Symbol:    symbol,
+		Price:     newPrice,
+		Change:    wrapperspb.Int32(changeAmount),
+		Timestamp: time.Now().UnixMilli(),
+	}
+
+	return updated
 }

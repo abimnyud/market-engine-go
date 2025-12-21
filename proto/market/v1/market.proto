@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package market.v1;
 
+import "google/protobuf/wrappers.proto";
+
 option go_package = "market-engine-go/gen/go/market/v1";
 
 message StreamTradesRequest {
@@ -19,4 +21,29 @@ message StreamTradesResponse {
 
 service MarketService {
   rpc StreamTrades(StreamTradesRequest) returns (stream StreamTradesResponse);
+  rpc GetTickers(GetTickersRequest) returns (GetTickersResponse) {}
+  rpc StreamTickers(stream StreamTickersRequest) returns (stream StreamTickersResponse);
+}
+
+message GetTickersRequest {}
+
+message GetTickersResponse {
+  repeated TickerData tickers = 1;
+}
+
+message TickerData {
+  string symbol = 1;
+  double price = 2;
+  string name = 3;
+}
+
+message StreamTickersRequest {
+  repeated string symbols = 1;
+}
+
+message StreamTickersResponse {
+  string symbol = 1;
+  double price = 2;
+  google.protobuf.Int32Value change = 3;
+  int64 timestamp = 4;
 }
