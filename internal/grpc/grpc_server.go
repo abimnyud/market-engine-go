@@ -5,10 +5,7 @@ import (
 	"log"
 	marketv1 "market-engine-go/gen/go/market/v1"
 	marketengine "market-engine-go/internal/market-engine"
-	"math/rand/v2"
 	"time"
-
-	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type MarketServer struct {
@@ -69,7 +66,7 @@ func (server *MarketServer) StreamTickers(stream marketv1.MarketService_StreamTi
 
 					tickerCtx, tickerCancel := context.WithCancel(ctx)
 					activeGenerators[symbol] = tickerCancel
-					go server.runPriceGenerator(tickerCtx, symbol, updateChannel)
+					go server.Engine.RunPriceGenerator(tickerCtx, symbol, updateChannel)
 				}
 			}
 		}
@@ -93,7 +90,7 @@ func (server *MarketServer) StreamTickers(stream marketv1.MarketService_StreamTi
 func (server *MarketServer) StreamTrades(req *marketv1.StreamTradesRequest, stream marketv1.MarketService_StreamTradesServer) error {
 	intervalMs := req.GetIntervalMs()
 	if intervalMs <= 0 {
-		intervalMs = 500
+		intervalMs = 100
 	}
 
 	ticker := time.NewTicker(time.Duration(intervalMs) * time.Millisecond)
@@ -132,39 +129,4 @@ func (server *MarketServer) StreamTrades(req *marketv1.StreamTradesRequest, stre
 			}
 		}
 	}
-}
-
-func (server *MarketServer) runPriceGenerator(ctx context.Context, symbol string, channel chan<- *marketv1.StreamTickersResponse) {
-	for {
-		interval := time.Duration(100+rand.IntN(2000)) * time.Millisecond
-
-		select {
-		case <-ctx.Done():
-			return
-		case <-time.After(interval):
-			updated := server.calculateNextPrice(symbol)
-			channel <- updated
-		}
-	}
-}
-
-func (server *MarketServer) calculateNextPrice(symbol string) *marketv1.StreamTickersResponse {
-	lastPrice, exists := server.Engine.CurrentPrices[symbol]
-	if !exists {
-		lastPrice = int64(server.Engine.Tickers[symbol].Price)
-	}
-
-	changeAmount := int32((rand.IntN(10) - 5) * 1)
-	newPrice := float64(lastPrice + int64(changeAmount))
-
-	server.Engine.Tickers[symbol].Price = newPrice
-
-	updated := &marketv1.StreamTickersResponse{
-		Symbol:    symbol,
-		Price:     newPrice,
-		Change:    wrapperspb.Int32(changeAmount),
-		Timestamp: time.Now().UnixMilli(),
-	}
-
-	return updated
 }

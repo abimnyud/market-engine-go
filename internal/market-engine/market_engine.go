@@ -1,6 +1,7 @@
 package marketengine
 
 import (
+	"context"
 	"fmt"
 	"maps"
 	"market-engine-go/internal/models"
@@ -11,6 +12,8 @@ import (
 	"time"
 
 	marketv1 "market-engine-go/gen/go/market/v1"
+
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type MarketEngine struct {
@@ -24,8 +27,9 @@ type MarketEngine struct {
 
 func New() *MarketEngine {
 	engine := &MarketEngine{
-		Trades:       make([]models.Trade, 0, 1000),
-		TradeChannel: make(chan models.Trade, 100),
+		Trades:        make([]models.Trade, 0, 1000),
+		TradeChannel:  make(chan models.Trade, 100),
+		CurrentPrices: make(map[string]int64),
 		Tickers: map[string]*marketv1.TickerData{
 			"BBCA": {Symbol: "BBCA", Price: 8150, Name: "Bank Central Asia Tbk"},
 			"BBRI": {Symbol: "BBRI", Price: 3800, Name: "Bank Rakyat Indonesia (Persero) Tbk"},
@@ -96,4 +100,48 @@ func (engine *MarketEngine) updateTrades() {
 	case engine.TradeChannel <- newTrade:
 	default:
 	}
+}
+
+func (engine *MarketEngine) RunPriceGenerator(ctx context.Context, symbol string, channel chan<- *marketv1.StreamTickersResponse) {
+	for {
+		interval := time.Duration(100+rand.IntN(1000)) * time.Millisecond
+
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(interval):
+			updated := engine.calculateNextPrice(symbol)
+
+			if updated != nil {
+				channel <- updated
+			}
+		}
+	}
+}
+
+func (engine *MarketEngine) calculateNextPrice(symbol string) *marketv1.StreamTickersResponse {
+	lastPrice, exists := engine.CurrentPrices[symbol]
+	if !exists {
+		lastPrice = int64(engine.Tickers[symbol].Price)
+	}
+
+	// TODO: Make it using the fraction system
+	changeAmount := int32((rand.IntN(10) - 5) * 1)
+
+	newPrice := lastPrice + int64(changeAmount)
+
+	if newPrice < 50 {
+		return nil
+	}
+
+	engine.CurrentPrices[symbol] = newPrice
+
+	updated := &marketv1.StreamTickersResponse{
+		Symbol:    symbol,
+		Price:     float64(newPrice),
+		Change:    wrapperspb.Int32(changeAmount),
+		Timestamp: time.Now().UnixMilli(),
+	}
+
+	return updated
 }
