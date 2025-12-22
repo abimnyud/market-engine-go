@@ -126,7 +126,18 @@ func (engine *MarketEngine) calculateNextPrice(symbol string) *marketv1.StreamTi
 	}
 
 	// TODO: Make it using the fraction system
-	changeAmount := int32((rand.IntN(10) - 5) * 1)
+	var changeAmount int
+	if lastPrice < 200 {
+		changeAmount = (rand.IntN(4) - 2)
+	} else if lastPrice >= 200 && lastPrice <= 500 {
+		changeAmount = (rand.IntN(4) - 2) * 2
+	} else if lastPrice >= 500 && lastPrice <= 2000 {
+		changeAmount = (rand.IntN(4) - 2) * 5
+	} else if lastPrice >= 2000 && lastPrice <= 5000 {
+		changeAmount = (rand.IntN(4) - 2) * 10
+	} else {
+		changeAmount = (rand.IntN(4) - 2) * 25
+	}
 
 	newPrice := lastPrice + int64(changeAmount)
 
@@ -139,7 +150,7 @@ func (engine *MarketEngine) calculateNextPrice(symbol string) *marketv1.StreamTi
 	updated := &marketv1.StreamTickersResponse{
 		Symbol:    symbol,
 		Price:     float64(newPrice),
-		Change:    wrapperspb.Int32(changeAmount),
+		Change:    wrapperspb.Int32(int32(changeAmount)),
 		Timestamp: time.Now().UnixMilli(),
 	}
 
