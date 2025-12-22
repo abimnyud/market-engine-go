@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	marketv1 "market-engine-go/gen/go/market/v1"
-	grpcserver "market-engine-go/internal/grpc"
+	grpcserver "market-engine-go/internal/infrastructure/grpc"
 	marketengine "market-engine-go/internal/market-engine"
 )
 
@@ -36,5 +36,4 @@ func main() {
 	if err := server.Serve(listener); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}
-
 }

@@ -3,5 +3,6 @@
 tmp
 build
 deploy.sh
+bin
 
 gen/swift

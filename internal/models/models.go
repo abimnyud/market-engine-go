@@ -21,3 +21,15 @@ type OrderBook struct {
 	Bids []Order `json:"bids"`
 	Asks []Order `json:"asks"`
 }
+
+type Stock struct {
+	Code      string
+	Name      string
+	High      string
+	Low       string
+	Close     string
+	Change    string
+	Volume    string
+	Value     string
+	Frequency string
+}
