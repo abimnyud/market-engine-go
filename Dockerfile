@@ -13,6 +13,7 @@ FROM gcr.io/distroless/static-debian11 AS final
 
 WORKDIR /app
 
+COPY --from=build /src/output /app/output
 COPY --from=build /market-engine /app/market-engine
 
 EXPOSE 50051
