@@ -22,14 +22,14 @@ type MarketEngine struct {
 	Mu            sync.RWMutex
 	Tickers       map[string]*marketv1.TickerData
 	TradeChannel  chan models.Trade
-	CurrentPrices map[string]int64
+	CurrentPrices map[string]float64
 }
 
 func New() *MarketEngine {
 	engine := &MarketEngine{
 		Trades:        make([]models.Trade, 0, 1000),
 		TradeChannel:  make(chan models.Trade, 100),
-		CurrentPrices: make(map[string]int64),
+		CurrentPrices: make(map[string]float64),
 		Tickers: map[string]*marketv1.TickerData{
 			"BBCA": {Symbol: "BBCA", Price: 8150, Name: "Bank Central Asia Tbk"},
 			"BBRI": {Symbol: "BBRI", Price: 3800, Name: "Bank Rakyat Indonesia (Persero) Tbk"},
@@ -122,7 +122,7 @@ func (engine *MarketEngine) RunPriceGenerator(ctx context.Context, symbol string
 func (engine *MarketEngine) calculateNextPrice(symbol string) *marketv1.StreamTickersResponse {
 	lastPrice, exists := engine.CurrentPrices[symbol]
 	if !exists {
-		lastPrice = int64(engine.Tickers[symbol].Price)
+		lastPrice = engine.Tickers[symbol].Price
 	}
 
 	// TODO: Make it using the fraction system
@@ -139,7 +139,7 @@ func (engine *MarketEngine) calculateNextPrice(symbol string) *marketv1.StreamTi
 		changeAmount = (rand.IntN(4) - 2) * 25
 	}
 
-	newPrice := lastPrice + int64(changeAmount)
+	newPrice := lastPrice + float64(changeAmount)
 
 	if newPrice < 50 {
 		return nil

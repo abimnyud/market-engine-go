@@ -16,6 +16,14 @@ type MarketServer struct {
 func (server *MarketServer) GetTickers(ctx context.Context, req *marketv1.GetTickersRequest) (*marketv1.GetTickersResponse, error) {
 	var res []*marketv1.TickerData
 	for _, v := range server.Engine.Tickers {
+		current := v
+
+		lastPrice, exists := server.Engine.CurrentPrices[v.Symbol]
+
+		if exists {
+			current.Price = float64(lastPrice)
+		}
+
 		res = append(res, v)
 	}
 
