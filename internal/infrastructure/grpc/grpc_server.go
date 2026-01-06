@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 	marketv1 "market-engine-go/gen/go/market/v1"
-	marketengine "market-engine-go/internal/market-engine"
+	marketengine "market-engine-go/internal/infrastructure/market-engine"
 	"time"
 )
 
@@ -34,6 +34,8 @@ func (server *MarketServer) StreamTickers(stream marketv1.MarketService_StreamTi
 	updateChannel := make(chan *marketv1.StreamTickersResponse, 100)
 	activeGenerators := make(map[string]context.CancelFunc)
 
+	errChannel := make(chan error, 1)
+
 	ctx, cancel := context.WithCancel(stream.Context())
 	defer cancel()
 
@@ -44,6 +46,7 @@ func (server *MarketServer) StreamTickers(stream marketv1.MarketService_StreamTi
 			req, err := stream.Recv()
 			if err != nil {
 				log.Println("[StreamTickers] Client closed connection")
+				errChannel <- err
 				return
 			}
 
@@ -82,6 +85,14 @@ func (server *MarketServer) StreamTickers(stream marketv1.MarketService_StreamTi
 
 	for {
 		select {
+		case <-errChannel:
+			for symbol, stop := range activeGenerators {
+				stop()
+				delete(activeGenerators, symbol)
+			}
+			cancel()
+
+			return nil
 		case <-ctx.Done():
 			log.Println("[StreamTickers] Client disconnected")
 

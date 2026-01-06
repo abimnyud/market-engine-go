@@ -7,10 +7,10 @@ import (
 	"maps"
 	"market-engine-go/internal/infrastructure/repository"
 	"market-engine-go/internal/models"
+	"market-engine-go/internal/utils"
 	"math"
 	"math/rand/v2"
 	"slices"
-	"strconv"
 	"sync"
 	"time"
 
@@ -59,8 +59,12 @@ func New() *MarketEngine {
 	if err == nil {
 		dummyStocks := make(map[string]*marketv1.TickerData)
 		for _, stock := range stocks {
-			price, err := strconv.ParseFloat(stock.Close, 64)
+			price, err := utils.ParseStockFloat(stock.Close)
 			if err != nil {
+				continue
+			}
+
+			if price < 50 {
 				continue
 			}
 
@@ -156,15 +160,15 @@ func (engine *MarketEngine) calculateNextPrice(symbol string) *marketv1.StreamTi
 	// TODO: Make it using the fraction system
 	var changeAmount int
 	if lastPrice < 200 {
-		changeAmount = (rand.IntN(4) - 1)
+		changeAmount = (rand.IntN(4) - 2)
 	} else if lastPrice >= 200 && lastPrice <= 500 {
-		changeAmount = (rand.IntN(4) - 1) * 2
+		changeAmount = (rand.IntN(4) - 2) * 2
 	} else if lastPrice >= 500 && lastPrice <= 2000 {
-		changeAmount = (rand.IntN(4) - 1) * 5
+		changeAmount = (rand.IntN(4) - 2) * 5
 	} else if lastPrice >= 2000 && lastPrice <= 5000 {
-		changeAmount = (rand.IntN(4) - 1) * 10
+		changeAmount = (rand.IntN(4) - 2) * 10
 	} else {
-		changeAmount = (rand.IntN(4) - 1) * 25
+		changeAmount = (rand.IntN(4) - 2) * 25
 	}
 
 	newPrice := lastPrice + float64(changeAmount)

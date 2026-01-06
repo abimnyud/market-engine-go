@@ -9,7 +9,7 @@ import (
 
 	marketv1 "market-engine-go/gen/go/market/v1"
 	grpcserver "market-engine-go/internal/infrastructure/grpc"
-	marketengine "market-engine-go/internal/market-engine"
+	marketengine "market-engine-go/internal/infrastructure/market-engine"
 )
 
 func main() {
