@@ -1,0 +1,46 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  PROJECT_ID: "personal-project-2002"
+  SERVICE_NAME: "market-engine"
+  REGION: "asia-southeast2"
+  REPOSITORY_NAME: "market-engine-repo"
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v3"
+        with:
+          credentials_json: "${{ secrets.GCP_CREDENTIALS }}"
+
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v2"
+        with:
+          project_id: "${{ env.PROJECT_ID }}"
+
+      - name: "Build and Push Container"
+        run: |
+          IMAGE_NAME="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.SERVICE_NAME }}:latest"
+          gcloud builds submit --tag $IMAGE_NAME .
+
+      - name: "Deploy to Cloud Run"
+        run: |
+          IMAGE_NAME="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.SERVICE_NAME }}:latest"
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
+            --image $IMAGE_NAME \
+            --region ${{ env.REGION }} \
+            --platform managed \
+            --allow-unauthenticated
