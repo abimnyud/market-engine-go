@@ -160,15 +160,15 @@ func (engine *MarketEngine) calculateNextPrice(symbol string) *marketv1.StreamTi
 	// TODO: Make it using the fraction system
 	var changeAmount int
 	if lastPrice < 200 {
-		changeAmount = (rand.IntN(4) - 2)
+		changeAmount = (rand.IntN(4) - 1)
 	} else if lastPrice >= 200 && lastPrice <= 500 {
-		changeAmount = (rand.IntN(4) - 2) * 2
+		changeAmount = (rand.IntN(4) - 1) * 2
 	} else if lastPrice >= 500 && lastPrice <= 2000 {
-		changeAmount = (rand.IntN(4) - 2) * 5
+		changeAmount = (rand.IntN(4) - 1) * 5
 	} else if lastPrice >= 2000 && lastPrice <= 5000 {
-		changeAmount = (rand.IntN(4) - 2) * 10
+		changeAmount = (rand.IntN(4) - 1) * 10
 	} else {
-		changeAmount = (rand.IntN(4) - 2) * 25
+		changeAmount = (rand.IntN(4) - 1) * 25
 	}
 
 	newPrice := lastPrice + float64(changeAmount)
